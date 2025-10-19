@@ -13,12 +13,13 @@ export const AppContextProvider = (props) =>{
     
     const getUserData = useCallback(async () =>{
         try{
-            const response = await axios.get(backendUrl+ '/user-details')
+            const response = await axios.get(backendUrl+ '/user-details', {withCredentials : true})
+            response.data ? setIsLoggedin(true) : setIsLoggedin(false);
             response.data.isVerified ? setIsVerified(true) : setIsVerified(false)
             response.data.success ? setUserData(response.data.userData) : toast.error(response.message)
             
-        }catch(error){
-            toast.error(error.message)
+        }catch{
+            console.log("no user data")
         }
         
     }, [backendUrl]);

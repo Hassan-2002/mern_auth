@@ -5,7 +5,9 @@ import transporter from '../config/nodeMailer.js';
 
 export const register = async (req,res) => {
     const {name, email, password} = req?.body;
-    console.log(name, email ,password)
+   
+
+
     if (!name || !email || !password ){
             
         return res.json({succes:false, message : 'missing details'}) 
@@ -30,8 +32,8 @@ export const register = async (req,res) => {
             maxAge : 7 * 24 * 24 * 1000
         })
         const mailOptions = {
-            from : 'abdullahibrahimhassan123@gmail.com',
-            to : 'abdullah.softwaredev@gmail.com',
+            from : process.env.SMTP_EMAIL,
+            to : String(email),
             subject : 'Welcome to mern auth',
             text : `Welcome to the website. Your account has been created using the email ${req.body.email}`
         }
@@ -81,7 +83,7 @@ export const login =  async(req,res) =>{
 
 export const logout = async(req, res) => {
      try{
-        console.log("logout endpoint is hit")
+       
         res.clearCookie('token', {
             httpOnly : true,
             secure : process.env.NODE_ENV === 'production',
@@ -95,10 +97,8 @@ export const logout = async(req, res) => {
 
 export const sendVerifyOtp = async (req, res) => {
     try {
+        console.log("send otp hit")
         const  userId  = req.userId;
-        
-        console.log(`${userId} - this is the user's ID in the controller`);
-
         const user = await userModel.findById(userId);
 
         if (!user) {
@@ -115,8 +115,8 @@ export const sendVerifyOtp = async (req, res) => {
         await user.save();
 
         const mailOptions = {
-            from: 'abdullahibrahimhassan123@gmail.com',
-            to: 'abdullah.softwaredev@gmail.com',
+            from: process.env.SMTP_EMAIL,
+            to: user.email,
             subject: 'Account verification OTP',
             text: `Your OTP for registration is ${otp}`,
         };
@@ -138,10 +138,14 @@ export const verifyEmail = async (req,res) =>{
    try{ 
         const userId = req.userId;
         const {enteredOtp} = req.body;
+        console.log(req.body)
+        console.log("otp received is " + enteredOtp)
         const user = await userModel.findById(userId)
-        if(!userId || !enteredOtp){
+        console.log(userId, enteredOtp)    
+        if( !userId || !enteredOtp){
                     res.status(418).json({success : false, message : 'Details missing'})
         }
+    
         if(enteredOtp !== user.verifyOtp){
              return res.status(401).json({status : false, message : 'Invalid otp'})
     
@@ -176,8 +180,8 @@ export const resetPassword = async(req,res) => {
     
 
         const mailOptions = {
-            from  : 'abdullahibrahimhassan123@gmail.com',
-            to : 'abdullah.softwaredev@gmail.com',
+            from  : process.env.SMTP_EMAIL,
+            to : email,
             subject : 'Password Rest OTP',
             text : `OTP for password reset  ${otp} 
             Please do not share this otp with anyone
